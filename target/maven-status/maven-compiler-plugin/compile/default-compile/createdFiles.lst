@@ -6,6 +6,7 @@ com/cs661/SymbolDemo$1.class
 com/cs661/App.class
 com/cs661/SymbolDemo.class
 com/cs661/StaticCodeAnalyzer$ScopeVisitor.class
+com/cs661/StaticCodeAnalyzer$Issue.class
 com/cs661/AstDemo.class
 com/cs661/SymbolTable$Scope.class
 com/cs661/SymbolTable.class
