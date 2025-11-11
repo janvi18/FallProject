@@ -1,18 +1,49 @@
-## Getting Started
+# Static Code Analyzer for Variable Usage in Java
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+**Author:** Janvi Shah  
+**Course:** CS-661 – Advanced Project  
+**Student ID:** S1377200  
+**GitHub Repository:** [https://github.com/janvi18/FallProject](https://github.com/janvi18/FallProject)
 
-## Folder Structure
+---
 
-The workspace contains two folders by default, where:
+## 📘 Project Overview
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
+This project is a **Static Code Analyzer** that examines Java source files to detect common **variable usage issues** such as:
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+- Variables declared but never used  
+- Variables used before declaration or initialization  
+- Redeclarations within the same scope  
+- Shadowing of variables in nested scopes  
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+The tool helps developers identify code-quality issues early and maintain cleaner, safer Java programs.
 
-## Dependency Management
+---
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+## ⚙️ Features Implemented (Weeks 1–11)
+
+| Week | Task | Status |
+|------|------|---------|
+| 1 | Project setup (JDK, Maven, GitHub) | ✅ |
+| 2 | Parser research (JavaParser chosen) | ✅ |
+| 3 | Basic CLI project structure | ✅ |
+| 4 | AST exploration using JavaParser | ✅ |
+| 5 | Symbol table design | ✅ |
+| 6 | Implemented scope management | ✅ |
+| 7 | Analysis Rule 1 – Declared but never used | ✅ |
+| 8 | Analysis Rule 2 – Used before declaration/initialization | ✅ |
+| 9 | Analysis Rule 3 – Redeclaration & shadowing detection | ✅ |
+| 10 | Reporting system (CLI + JSON output) | ✅ |
+| 11 | JUnit 5 testing and validation | ✅ |
+
+---
+
+## 🧩 Technical Details
+
+### **Language & Frameworks**
+- Java 21 (OpenJDK / Temurin)
+- Maven (build tool)
+- [JavaParser 3.26.2](https://javaparser.org/)
+- JUnit 5 (testing)
+
+### **Project Structure**
