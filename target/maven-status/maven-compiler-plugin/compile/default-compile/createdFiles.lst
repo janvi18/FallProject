@@ -1,2 +1,11 @@
+com/cs661/SymbolTable$Symbol.class
+com/cs661/StaticCodeAnalyzer.class
+com/cs661/StaticCodeAnalyzer$VariableInfo.class
+com/cs661/StaticCodeAnalyzer$Scope.class
+com/cs661/SymbolDemo$1.class
 com/cs661/App.class
+com/cs661/SymbolDemo.class
+com/cs661/StaticCodeAnalyzer$ScopeVisitor.class
 com/cs661/AstDemo.class
+com/cs661/SymbolTable$Scope.class
+com/cs661/SymbolTable.class
