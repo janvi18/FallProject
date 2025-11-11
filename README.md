@@ -47,3 +47,34 @@ The tool helps developers identify code-quality issues early and maintain cleane
 - JUnit 5 (testing)
 
 ### **Project Structure**
+### Project Structure
+
+```bash
+java-analyzer/
+│
+├── examples/
+│   ├── Sample1.java
+│   ├── Sample2.java
+│   ├── Sample3.java
+│   └── Week9Sample.java
+│
+├── src/
+│   ├── main/java/com/cs661/
+│   │   ├── App.java
+│   │   ├── AstDemo.java
+│   │   ├── StaticCodeAnalyzer.java
+│   │   ├── SymbolDemo.java
+│   │   └── SymbolTable.java
+│   │
+│   └── test/java/com/cs661/
+│       └── StaticCodeAnalyzerTest.java
+│
+├── lib/
+│   └── javaparser-core-3.26.2.jar
+│
+├── pom.xml
+├── README.md
+└── target/
+    ├── classes/
+    ├── test-classes/
+    └── ...
