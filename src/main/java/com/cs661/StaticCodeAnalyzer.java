@@ -1,13 +1,5 @@
 package com.cs661;
 
-import java.io.File;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
@@ -19,23 +11,14 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
+import java.io.File;
+import java.util.*;
+
 /**
  * Static Code Analyzer (Weeks 6–10)
- *
- * Rules:
- *  - Week 7: Declared but never used
- *  - Week 8: Use before declaration / initialization
- *  - Week 9: Redeclaration in same scope, shadowing (info)
- *  - Week 10: Clean CLI reporting + optional JSON export
- *
- * Usage:
- *   java com.cs661.StaticCodeAnalyzer <JavaSourceFile> [--json]
  */
 public class StaticCodeAnalyzer {
 
-    // ======================= Core Models =======================
-
-    // One variable tracked in the symbol table
     static class VariableInfo {
         final String name;
         final int line;
@@ -50,7 +33,6 @@ public class StaticCodeAnalyzer {
         }
     }
 
-    // One lexical scope (class / method / block)
     static class Scope {
         final String name;
         final Scope parent;
@@ -72,10 +54,9 @@ public class StaticCodeAnalyzer {
         }
     }
 
-    // One analysis issue (for reporting + JSON)
     static class Issue {
-        final String type;       // e.g. UNUSED, USE_BEFORE_INIT, REDECLARATION, SHADOWING
-        final String severity;   // INFO / WARNING / ERROR (we use INFO/WARNING here)
+        final String type;
+        final String severity;
         final String file;
         final int line;
         final String varName;
@@ -96,13 +77,9 @@ public class StaticCodeAnalyzer {
         }
     }
 
-    // ======================= State =======================
-
     private static final Deque<Scope> scopeStack = new ArrayDeque<>();
     private static final List<VariableInfo> allVariables = new ArrayList<>();
     private static final List<Issue> issues = new ArrayList<>();
-
-    // ======================= Main =======================
 
     public static void main(String[] args) throws Exception {
         if (args.length < 1 || args.length > 2) {
@@ -122,7 +99,6 @@ public class StaticCodeAnalyzer {
         String fileName = file.getName();
         CompilationUnit cu = StaticJavaParser.parse(file);
 
-        // reset state (in case of multiple runs in same JVM)
         scopeStack.clear();
         allVariables.clear();
         issues.clear();
@@ -131,7 +107,7 @@ public class StaticCodeAnalyzer {
         new ScopeVisitor(fileName).visit(cu, null);
         scopeStack.pop();
 
-        // Post-processing: Week 7 (declared but never used)
+        // Week 7: declared but never used
         for (VariableInfo v : allVariables) {
             if (!v.used) {
                 issues.add(new Issue(
@@ -147,17 +123,13 @@ public class StaticCodeAnalyzer {
             }
         }
 
-        // ========== Text Report (Week 10 - clean CLI output) ==========
         printTextReport(fileName);
 
-        // ========== Optional JSON Export ==========
         if (jsonRequested) {
             System.out.println();
             printJsonReport(fileName);
         }
     }
-
-    // ======================= Visitor =======================
 
     private static class ScopeVisitor extends VoidVisitorAdapter<Void> {
         final String fileName;
@@ -187,7 +159,6 @@ public class StaticCodeAnalyzer {
             exitScope();
         }
 
-        // Variable declarations
         @Override
         public void visit(VariableDeclarator var, Void arg) {
             super.visit(var, arg);
@@ -198,7 +169,6 @@ public class StaticCodeAnalyzer {
             String name = var.getNameAsString();
             int line = var.getBegin().map(p -> p.line).orElse(-1);
 
-            // Redeclaration in same scope
             if (scope.variables.containsKey(name)) {
                 issues.add(new Issue(
                         "REDECLARATION",
@@ -213,7 +183,6 @@ public class StaticCodeAnalyzer {
                 return;
             }
 
-            // Shadowing (exists in outer scope)
             Scope outer = findInScopes(name, scope.parent);
             if (outer != null) {
                 VariableInfo outerInfo = outer.variables.get(name);
@@ -232,7 +201,6 @@ public class StaticCodeAnalyzer {
             }
 
             VariableInfo info = new VariableInfo(name, line, scope.path());
-            // Initialized at declaration?
             if (var.getInitializer().isPresent()) {
                 info.initialized = true;
             }
@@ -241,7 +209,6 @@ public class StaticCodeAnalyzer {
             allVariables.add(info);
         }
 
-        // Variable usage
         @Override
         public void visit(NameExpr expr, Void arg) {
             super.visit(expr, arg);
@@ -254,7 +221,6 @@ public class StaticCodeAnalyzer {
 
             Scope found = findInScopes(name, scope);
             if (found == null) {
-                // Unresolved variable (not required by spec, but helpful)
                 issues.add(new Issue(
                         "UNDECLARED_VARIABLE",
                         "WARNING",
@@ -271,7 +237,6 @@ public class StaticCodeAnalyzer {
             VariableInfo info = found.variables.get(name);
             if (info == null) return;
 
-            // Week 8: used before declaration
             if (line < info.line) {
                 issues.add(new Issue(
                         "USE_BEFORE_DECLARATION",
@@ -283,9 +248,7 @@ public class StaticCodeAnalyzer {
                         "Move the declaration above this usage.",
                         info.scopePath
                 ));
-            }
-            // Week 8: used before initialization
-            else if (!info.initialized) {
+            } else if (!info.initialized) {
                 issues.add(new Issue(
                         "USE_BEFORE_INITIALIZATION",
                         "WARNING",
@@ -301,7 +264,6 @@ public class StaticCodeAnalyzer {
             info.used = true;
         }
 
-        // Assignments mark variables as initialized
         @Override
         public void visit(AssignExpr assign, Void arg) {
             super.visit(assign, arg);
@@ -319,8 +281,6 @@ public class StaticCodeAnalyzer {
             }
         }
     }
-
-    // ======================= Helper Methods =======================
 
     private static Scope currentScope() {
         return scopeStack.peek();
@@ -348,8 +308,6 @@ public class StaticCodeAnalyzer {
         scopeStack.pop();
     }
 
-    // ======================= Reporting =======================
-
     private static void printTextReport(String fileName) {
         System.out.println("=========================================================");
         System.out.println(" Static Code Analysis Report for " + fileName);
@@ -361,14 +319,8 @@ public class StaticCodeAnalyzer {
         }
 
         for (Issue i : issues) {
-            System.out.printf(
-                    "[%s] (%s) %s:%d - %s%n",
-                    i.severity,
-                    i.type,
-                    i.file,
-                    i.line,
-                    i.message
-            );
+            System.out.printf("[%s] (%s) %s:%d - %s%n",
+                    i.severity, i.type, i.file, i.line, i.message);
             if (i.scopePath != null && !i.scopePath.isEmpty()) {
                 System.out.println("      Scope: " + i.scopePath);
             }
